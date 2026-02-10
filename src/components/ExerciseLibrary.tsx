@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Check } from 'lucide-react';
+import { Search, Filter, Plus, Check, Dumbbell, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { LibraryExercise } from '../App';
 
@@ -18,7 +18,7 @@ const MOCK_EXERCISES = [
   { id: '12', name: 'Agachamento Búlgaro', category: 'Pernas', equipment: 'Haltere', color: 'bg-red-100' },
 ];
 
-export function ExerciseLibrary({
+function ExerciseListContent({
   onAddExercise,
 }: {
   onAddExercise?: (ex: LibraryExercise) => void;
@@ -41,7 +41,7 @@ export function ExerciseLibrary({
   };
 
   return (
-    <div className="w-80 h-screen bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 z-20 hidden xl:flex">
+    <>
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-sm text-gray-900 uppercase tracking-wide">Exercícios</h2>
@@ -116,6 +116,57 @@ export function ExerciseLibrary({
           })}
         </AnimatePresence>
       </div>
-    </div>
+    </>
+  );
+}
+
+export function ExerciseLibrary({
+  onAddExercise,
+}: {
+  onAddExercise?: (ex: LibraryExercise) => void;
+}) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop sidebar – visible only on xl+ */}
+      <div className="w-80 h-screen bg-white border-l border-gray-200 flex-col fixed right-0 top-0 z-20 hidden xl:flex">
+        <ExerciseListContent onAddExercise={onAddExercise} />
+      </div>
+
+      {/* Mobile FAB – visible below xl */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-yellow-400 text-gray-900 shadow-lg flex items-center justify-center hover:bg-yellow-500 transition-colors xl:hidden"
+      >
+        <Dumbbell size={24} />
+      </button>
+
+      {/* Mobile fullscreen modal */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed inset-0 z-50 bg-white flex flex-col xl:hidden"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h2 className="font-bold text-sm text-gray-900 uppercase tracking-wide">Exercícios</h2>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <ExerciseListContent onAddExercise={onAddExercise} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

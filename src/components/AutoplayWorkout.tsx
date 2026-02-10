@@ -243,13 +243,22 @@ function ExerciseCard({
 }) {
   return (
     <div className="flex flex-col gap-4 py-4 rounded-lg bg-white">
-      {/* Title row */}
-      <h3 className="text-sm font-bold text-gray-900 truncate">{item.name}</h3>
+      {/* Title row – with inline thumbnail on mobile */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 md:hidden">
+          <img
+            src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop"
+            alt={item.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <h3 className="text-sm font-bold text-gray-900 truncate">{item.name}</h3>
+      </div>
 
-      {/* Content row: Thumbnail | Form | Actions */}
-      <div className="flex gap-x-4">
-        {/* Thumbnail */}
-        <div className="w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+      {/* Content: form only on mobile, thumbnail + form on md+ */}
+      <div className="flex gap-4">
+        {/* Thumbnail – desktop only */}
+        <div className="hidden md:block w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           <img
             src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop"
             alt={item.name}
@@ -284,8 +293,8 @@ function ExerciseCard({
           </div>
         </div>
 
-        {/* Action buttons column */}
-        <div className="grid grid-rows-3 items-center justify-center flex-shrink-0">
+        {/* Action buttons – vertical on md+, hidden on mobile (shown below) */}
+        <div className="hidden md:grid grid-rows-3 items-center justify-center flex-shrink-0">
           <button
             onClick={() => {
               if (index > 0) onMoveUp();
@@ -308,6 +317,31 @@ function ExerciseCard({
             <Copy size={18} />
           </button>
         </div>
+      </div>
+
+      {/* Mobile action buttons – horizontal row */}
+      <div className="flex md:hidden items-center justify-end gap-1 pt-1 border-t border-gray-100">
+        <button
+          onClick={() => {
+            if (index > 0) onMoveUp();
+            else if (index < total - 1) onMoveDown();
+          }}
+          className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors"
+        >
+          <GripVertical size={18} />
+        </button>
+        <button
+          onClick={onDuplicate}
+          className="flex items-center justify-center p-2 text-gray-300 hover:text-blue-500 transition-colors"
+        >
+          <Copy size={18} />
+        </button>
+        <button
+          onClick={onRemove}
+          className="flex items-center justify-center p-2 text-gray-300 hover:text-red-500 transition-colors"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
     </div>
   );
@@ -343,26 +377,45 @@ function RestCard({
 
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-100 overflow-visible">
-      <div className="flex items-center gap-3 px-4 py-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200/60">
-          <Timer size={16} className="text-gray-400" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-xs font-bold text-gray-500 uppercase">Descanso</span>
-            <span className="text-xs font-bold text-gray-400">{formatDuration(item.duration)}</span>
+      <div className="flex flex-col gap-2 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200/60 flex-shrink-0">
+            <Timer size={16} className="text-gray-400" />
           </div>
-          <input
-            type="text"
-            value={item.label}
-            onChange={(e) => onUpdate({ label: e.target.value })}
-            placeholder="Descanso ativo, alongamento..."
-            className="w-full text-xs text-gray-500 bg-transparent border-none outline-none placeholder-gray-300"
-          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-xs font-bold text-gray-500 uppercase">Descanso</span>
+              <span className="text-xs font-bold text-gray-400">{formatDuration(item.duration)}</span>
+            </div>
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => onUpdate({ label: e.target.value })}
+              placeholder="Descanso ativo, alongamento..."
+              className="w-full text-xs text-gray-500 bg-transparent border-none outline-none placeholder-gray-300"
+            />
+          </div>
+
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-1.5 text-gray-300 hover:text-gray-500 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            <AnimatePresence>
+              {isMenuOpen && (
+                <DropdownMenu
+                  actions={menuActions}
+                  onClose={() => setIsMenuOpen(false)}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Duration quick buttons */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap pl-11">
           {[10, 15, 20, 30, 60].map((d) => (
             <button
               key={d}
@@ -376,23 +429,6 @@ function RestCard({
               {presetLabel(d)}
             </button>
           ))}
-        </div>
-
-        <div className="relative flex-shrink-0">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-1.5 text-gray-300 hover:text-gray-500 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <MoreHorizontal size={16} />
-          </button>
-          <AnimatePresence>
-            {isMenuOpen && (
-              <DropdownMenu
-                actions={menuActions}
-                onClose={() => setIsMenuOpen(false)}
-              />
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </div>

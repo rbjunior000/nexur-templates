@@ -38,11 +38,11 @@ const navItems: NavItem[] = [
   { icon: MessageSquare },
 ];
 
-export function Sidebar() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const hash = window.location.hash || '#/strict';
 
   return (
-    <div className="w-16 h-screen bg-white border-r border-gray-200 flex flex-col items-center py-4 fixed left-0 top-0 z-20 overflow-y-auto hide-scrollbar">
+    <>
       <div className="mb-8">
         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-xl">
           N
@@ -55,7 +55,10 @@ export function Sidebar() {
           return (
             <button
               key={index}
-              onClick={() => item.href && (window.location.hash = item.href)}
+              onClick={() => {
+                if (item.href) window.location.hash = item.href;
+                onNavigate?.();
+              }}
               className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${
                 isActive
                   ? 'bg-yellow-400 text-gray-900'
@@ -73,6 +76,38 @@ export function Sidebar() {
           <LogOut size={20} />
         </button>
       </div>
-    </div>
+    </>
+  );
+}
+
+export function Sidebar({
+  mobileOpen,
+  onClose,
+}: {
+  mobileOpen: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      {/* Desktop sidebar – hidden on mobile */}
+      <div className="hidden md:flex w-16 h-screen bg-white border-r border-gray-200 flex-col items-center py-4 fixed left-0 top-0 z-20 overflow-y-auto hide-scrollbar">
+        <SidebarContent />
+      </div>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={onClose}
+          />
+          {/* Drawer panel */}
+          <div className="absolute left-0 top-0 h-full w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 overflow-y-auto hide-scrollbar">
+            <SidebarContent onNavigate={onClose} />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutEditor } from './components/WorkoutEditor';
@@ -42,6 +43,7 @@ function useHashRoute(): [Page, (p: Page) => void] {
 export function App() {
   const [page] = useHashRoute();
   const addExerciseFnRef = useRef<((ex: LibraryExercise) => void) | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Shared aerobic workout state (so summary sidebar can read it)
   const [aerobicWorkout] = useState<AerobicWorkout>({
@@ -54,10 +56,18 @@ export function App() {
   });
 
   return (
-    <div className="min-h-screen bg-white flex">
-      <Sidebar />
+    <div className="min-h-screen bg-white flex overflow-x-hidden">
+      <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="flex-1 ml-16 mr-0 xl:mr-80 transition-all duration-300">
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="fixed top-4 left-4 z-30 w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 shadow-sm text-gray-600 md:hidden"
+      >
+        <Menu size={20} />
+      </button>
+
+      <main className="flex-1 min-w-0 ml-0 md:ml-16 mr-0 xl:mr-80 transition-all duration-300">
         {page === 'strict' && (
           <WorkoutEditor
             onRegisterAdd={(fn) => {

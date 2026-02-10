@@ -440,15 +440,18 @@ function ExerciseCard({
 
   return (
     <div className="flex flex-col gap-4 py-4 rounded-lg bg-white">
-      {/* Title row */}
-      <div className="flex items-center gap-2">
+      {/* Title row – with inline thumbnail on mobile */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 md:hidden">
+          <img src={exercise.thumbnail} alt={exercise.name} className="w-full h-full object-cover" />
+        </div>
         <h3 className="text-sm font-bold text-gray-900 truncate">{exercise.name}</h3>
       </div>
 
-      {/* Content row: Thumbnail | Form | Actions */}
-      <div className="flex gap-x-4">
-        {/* Thumbnail */}
-        <div className="w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+      {/* Content: form only on mobile, thumbnail + form on md+ */}
+      <div className="flex gap-4">
+        {/* Thumbnail – desktop only */}
+        <div className="hidden md:block w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           <img src={exercise.thumbnail} alt={exercise.name} className="w-full h-full object-cover" />
         </div>
 
@@ -560,7 +563,7 @@ function ExerciseCard({
                       </div>
                     ))}
 
-                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => duplicateSet(set.id)}
                         className="p-1 text-gray-300 hover:text-blue-500 transition-colors"
@@ -610,8 +613,8 @@ function ExerciseCard({
           </div>
         </div>
 
-        {/* Action buttons column */}
-        <div className="grid grid-rows-3 items-center justify-center flex-shrink-0">
+        {/* Action buttons – vertical on md+, hidden on mobile (shown below) */}
+        <div className="hidden md:grid grid-rows-3 items-center justify-center flex-shrink-0">
           <button
             className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors"
           >
@@ -630,6 +633,27 @@ function ExerciseCard({
             <Copy size={18} />
           </button>
         </div>
+      </div>
+
+      {/* Mobile action buttons – horizontal row */}
+      <div className="flex md:hidden items-center justify-end gap-1 pt-1 border-t border-gray-100">
+        <button
+          className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors"
+        >
+          <GripVertical size={18} />
+        </button>
+        <button
+          onClick={onDuplicate}
+          className="flex items-center justify-center p-2 text-gray-300 hover:text-blue-500 transition-colors"
+        >
+          <Copy size={18} />
+        </button>
+        <button
+          onClick={onRemove}
+          className="flex items-center justify-center p-2 text-gray-300 hover:text-red-500 transition-colors"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
     </div>
   );

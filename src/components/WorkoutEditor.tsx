@@ -9,7 +9,7 @@ export function WorkoutEditor({
   onRegisterAdd?: (fn: (ex: LibraryExercise) => void) => void;
 }) {
   return (
-    <div className="max-w-4xl mx-auto px-8 py-6">
+    <div className="max-w-4xl mx-auto px-4 md:px-8 py-6">
       <WorkoutHeader />
 
       <div className="mb-8">

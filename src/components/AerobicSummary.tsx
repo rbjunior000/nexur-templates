@@ -1,4 +1,6 @@
-import { Clock, Layers, Repeat } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, Layers, Repeat, BarChart2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type {
   AerobicWorkout,
   IntensityZone,
@@ -40,7 +42,7 @@ function formatStepDuration(dur: string, type: string) {
   return dur;
 }
 
-export function AerobicSummary({ workout }: { workout: AerobicWorkout }) {
+function SummaryContent({ workout }: { workout: AerobicWorkout }) {
   const totalSteps = workout.blocks.reduce((acc, b) => acc + b.steps.length, 0);
 
   const totalSeconds = workout.blocks.reduce((acc, b) => {
@@ -52,7 +54,7 @@ export function AerobicSummary({ workout }: { workout: AerobicWorkout }) {
   }, 0);
 
   return (
-    <div className="w-80 h-screen bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 z-20 hidden xl:flex">
+    <>
       <div className="p-4 border-b border-gray-100">
         <h2 className="font-bold text-sm text-gray-900 uppercase tracking-wide">
           Resumo do Treino
@@ -114,6 +116,53 @@ export function AerobicSummary({ workout }: { workout: AerobicWorkout }) {
           </div>
         ))}
       </div>
-    </div>
+    </>
+  );
+}
+
+export function AerobicSummary({ workout }: { workout: AerobicWorkout }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop sidebar – visible only on xl+ */}
+      <div className="w-80 h-screen bg-white border-l border-gray-200 flex-col fixed right-0 top-0 z-20 hidden xl:flex">
+        <SummaryContent workout={workout} />
+      </div>
+
+      {/* Mobile FAB – visible below xl */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-yellow-400 text-gray-900 shadow-lg flex items-center justify-center hover:bg-yellow-500 transition-colors xl:hidden"
+      >
+        <BarChart2 size={24} />
+      </button>
+
+      {/* Mobile fullscreen modal */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed inset-0 z-50 bg-white flex flex-col xl:hidden"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h2 className="font-bold text-sm text-gray-900 uppercase tracking-wide">Resumo do Treino</h2>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <SummaryContent workout={workout} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
