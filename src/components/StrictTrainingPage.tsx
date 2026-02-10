@@ -143,6 +143,8 @@ const MOCK_EXERCISES: TrainingExercise[] = [
   },
 ];
 
+
+
 const MOCK_SUPERSETS: SupersetGroup[] = [
   {
     id: 'ss1',
