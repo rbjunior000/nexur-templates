@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Trash2,
   Plus,
-  Clock,
   MoreHorizontal,
   Copy,
   ArrowUp,
@@ -10,7 +9,6 @@ import {
   GripVertical,
   Timer,
   ArrowRight,
-  Pencil,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -159,12 +157,7 @@ function DurationChips({
   };
 
   return (
-    <div className="flex items-center gap-4 py-2 overflow-x-auto hide-scrollbar">
-      <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase whitespace-nowrap">
-        <Clock size={14} />
-        Duração
-      </div>
-      <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 flex-wrap">
         {DURATION_PRESETS.map((d) => (
           <button
             key={d}
@@ -204,7 +197,6 @@ function DurationChips({
             Custom
           </button>
         )}
-      </div>
     </div>
   );
 }
@@ -249,81 +241,72 @@ function ExerciseCard({
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const menuActions: MenuAction[] = [];
-  menuActions.push({ icon: Copy, label: 'Duplicar', onClick: onDuplicate });
-  if (index > 0)
-    menuActions.push({ icon: ArrowUp, label: 'Mover para cima', onClick: onMoveUp });
-  if (index < total - 1)
-    menuActions.push({ icon: ArrowDown, label: 'Mover para baixo', onClick: onMoveDown });
-  menuActions.push({ icon: Trash2, label: 'Remover', danger: true, onClick: onRemove });
-
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-visible">
-      {/* Header */}
-      <div className="flex items-start gap-3 p-4 border-b border-gray-50">
-        <div className="flex items-center self-center text-gray-300 cursor-grab hover:text-gray-400 transition-colors">
-          <GripVertical size={16} />
-        </div>
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+    <div className="flex flex-col gap-4 py-4 rounded-lg bg-white">
+      {/* Title row */}
+      <h3 className="text-sm font-bold text-gray-900 truncate">{item.name}</h3>
+
+      {/* Content row: Thumbnail | Form | Actions */}
+      <div className="flex gap-x-4">
+        {/* Thumbnail */}
+        <div className="w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           <img
             src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop"
             alt={item.name}
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <h3 className="text-sm font-bold text-gray-900 truncate">{item.name}</h3>
-            <div className="relative flex-shrink-0">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-              <AnimatePresence>
-                {isMenuOpen && (
-                  <DropdownMenu
-                    actions={menuActions}
-                    onClose={() => setIsMenuOpen(false)}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">{item.equipment}</span>
-            <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-gray-400">{item.category}</span>
-            <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs font-bold text-yellow-600">{formatDuration(item.duration)}</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Duration + Label */}
-      <div className="px-4 pt-3 pb-4">
-        <DurationChips
-          value={item.duration}
-          onChange={(d) => onUpdate({ duration: d })}
-        />
+        {/* Form fields */}
+        <div className="flex-1 flex flex-col gap-y-3 min-w-0">
+          {/* Duration */}
+          <div className="flex flex-col gap-y-1">
+            <label className="text-[10px] font-bold text-gray-400 uppercase">
+              Duração
+            </label>
+            <DurationChips
+              value={item.duration}
+              onChange={(d) => onUpdate({ duration: d })}
+            />
+          </div>
 
-        <div className="mt-3">
-          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">
-            Observações
-          </label>
-          <div className="flex items-start gap-2">
-            <Pencil size={14} className="text-gray-300 mt-2.5 shrink-0" />
-            <input
-              type="text"
+          {/* Label / Observações */}
+          <div className="flex flex-col gap-y-1">
+            <label className="text-[10px] font-bold text-gray-400 uppercase">
+              Observações
+            </label>
+            <textarea
               value={item.label}
               onChange={(e) => onUpdate({ label: e.target.value })}
               placeholder="Ex: Ritmo forte, sem pausa..."
-              className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
+              className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all resize-none h-16"
             />
           </div>
+        </div>
+
+        {/* Action buttons column */}
+        <div className="grid grid-rows-3 items-center justify-center flex-shrink-0">
+          <button
+            onClick={() => {
+              if (index > 0) onMoveUp();
+              else if (index < total - 1) onMoveDown();
+            }}
+            className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors"
+          >
+            <GripVertical size={18} />
+          </button>
+          <button
+            onClick={onRemove}
+            className="flex items-center justify-center p-2 text-gray-300 hover:text-red-500 transition-colors"
+          >
+            <Trash2 size={18} />
+          </button>
+          <button
+            onClick={onDuplicate}
+            className="flex items-center justify-center p-2 text-gray-300 hover:text-blue-500 transition-colors"
+          >
+            <Copy size={18} />
+          </button>
         </div>
       </div>
     </div>

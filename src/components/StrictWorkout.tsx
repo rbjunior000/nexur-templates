@@ -1,17 +1,13 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Trash2,
   Plus,
   Clock,
-  MoreHorizontal,
   ChevronDown,
   Check,
   Copy,
-  ArrowUp,
-  ArrowDown,
-  Link,
-  Unlink,
   GripVertical,
+  Link,
   Dumbbell,
   ArrowRight,
 } from 'lucide-react';
@@ -151,66 +147,6 @@ function cloneExercise(ex: StrictExercise): StrictExercise {
   };
 }
 
-// --- Dropdown Menu ---
-type MenuAction = {
-  icon: typeof Trash2;
-  label: string;
-  color?: string;
-  danger?: boolean;
-  active?: boolean;
-  onClick: () => void;
-};
-
-function DropdownMenu({
-  actions,
-  onClose,
-}: {
-  actions: MenuAction[];
-  onClose: () => void;
-}) {
-  return (
-    <>
-      <div className="fixed inset-0 z-10" onClick={onClose} />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -4 }}
-        transition={{ duration: 0.12 }}
-        className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-20 py-1 overflow-hidden"
-      >
-        {actions.map((action, i) => (
-          <Fragment key={i}>
-            {action.danger && i > 0 && <div className="border-t border-gray-100 my-1" />}
-            <button
-              onClick={() => {
-                action.onClick();
-                onClose();
-              }}
-              className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
-                action.danger
-                  ? 'text-red-500 hover:bg-red-50'
-                  : `${action.color || 'text-gray-600'} hover:bg-gray-50`
-              }`}
-            >
-              <action.icon size={16} />
-              <span className="flex-1">{action.label}</span>
-              {action.active !== undefined && (
-                <span
-                  className={`w-5 h-5 rounded-md flex items-center justify-center text-white text-xs ${
-                    action.active ? 'bg-yellow-400' : 'bg-gray-200'
-                  }`}
-                >
-                  {action.active && <Check size={12} strokeWidth={3} />}
-                </span>
-              )}
-            </button>
-          </Fragment>
-        ))}
-      </motion.div>
-    </>
-  );
-}
-
 // --- Confirm dialog ---
 function ConfirmDialog({
   message,
@@ -337,25 +273,6 @@ export function StrictWorkout({
     });
   };
 
-  const moveExercise = (index: number, dir: -1 | 1) => {
-    setExercises((prev) => {
-      const target = index + dir;
-      if (target < 0 || target >= prev.length) return prev;
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  };
-
-  const toggleSuperset = (index: number) => {
-    if (index >= exercises.length - 1) return;
-    setExercises((prev) =>
-      prev.map((ex, i) =>
-        i === index ? { ...ex, supersetWithNext: !ex.supersetWithNext } : ex
-      )
-    );
-  };
-
   if (exercises.length === 0) {
     return <EmptyState />;
   }
@@ -401,9 +318,6 @@ export function StrictWorkout({
 
                 <ExerciseCard
                   exercise={exercise}
-                  index={index}
-                  total={exercises.length}
-                  isLast={index === exercises.length - 1}
                   onUpdate={(updates) => updateExercise(exercise.id, updates)}
                   onRemove={() =>
                     setConfirmAction({
@@ -415,9 +329,6 @@ export function StrictWorkout({
                     })
                   }
                   onDuplicate={() => duplicateExercise(index)}
-                  onMoveUp={() => moveExercise(index, -1)}
-                  onMoveDown={() => moveExercise(index, 1)}
-                  onToggleSuperset={() => toggleSuperset(index)}
                 />
               </div>
             </motion.div>
@@ -487,30 +398,17 @@ function RestSelector({
 // --- Exercise Card ---
 function ExerciseCard({
   exercise,
-  index,
-  total,
-  isLast,
   onUpdate,
   onRemove,
   onDuplicate,
-  onMoveUp,
-  onMoveDown,
-  onToggleSuperset,
 }: {
   exercise: StrictExercise;
-  index: number;
-  total: number;
-  isLast: boolean;
   onUpdate: (updates: Partial<StrictExercise>) => void;
   onRemove: () => void;
   onDuplicate: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  onToggleSuperset: () => void;
 }) {
   const config = TYPE_CONFIG[exercise.type];
   const [isTypeOpen, setIsTypeOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleTypeChange = (newType: ExerciseType) => {
     onUpdate({ type: newType, sets: [] });
@@ -540,52 +438,24 @@ function ExerciseCard({
     onUpdate({ sets: newSets });
   };
 
-  // Build menu actions
-  const menuActions: MenuAction[] = [];
-  if (!isLast) {
-    menuActions.push({
-      icon: exercise.supersetWithNext ? Unlink : Link,
-      label: exercise.supersetWithNext ? 'Desvincular superset' : 'Superset com próximo',
-      color: exercise.supersetWithNext ? 'text-yellow-600' : 'text-gray-600',
-      active: exercise.supersetWithNext,
-      onClick: onToggleSuperset,
-    });
-  }
-  menuActions.push({ icon: Copy, label: 'Duplicar exercício', onClick: onDuplicate });
-  if (index > 0) menuActions.push({ icon: ArrowUp, label: 'Mover para cima', onClick: onMoveUp });
-  if (index < total - 1) menuActions.push({ icon: ArrowDown, label: 'Mover para baixo', onClick: onMoveDown });
-  menuActions.push({ icon: Trash2, label: 'Remover exercício', danger: true, onClick: onRemove });
-
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-visible">
-      {/* Header */}
-      <div className="flex items-start gap-3 p-4 border-b border-gray-50">
-        <div className="flex items-center self-center text-gray-300 cursor-grab hover:text-gray-400 transition-colors">
-          <GripVertical size={16} />
-        </div>
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+    <div className="flex flex-col gap-4 py-4 rounded-lg bg-white">
+      {/* Title row */}
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-bold text-gray-900 truncate">{exercise.name}</h3>
+      </div>
+
+      {/* Content row: Thumbnail | Form | Actions */}
+      <div className="flex gap-x-4">
+        {/* Thumbnail */}
+        <div className="w-36 h-36 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           <img src={exercise.thumbnail} alt={exercise.name} className="w-full h-full object-cover" />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <h3 className="text-sm font-bold text-gray-900 truncate">{exercise.name}</h3>
-            <div className="relative flex-shrink-0">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-              <AnimatePresence>
-                {isMenuOpen && (
-                  <DropdownMenu actions={menuActions} onClose={() => setIsMenuOpen(false)} />
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
 
+        {/* Form fields */}
+        <div className="flex-1 flex flex-col gap-y-3 min-w-0">
+          {/* Type Selector */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Type Selector */}
             <div className="relative">
               <button
                 onClick={() => setIsTypeOpen(!isTypeOpen)}
@@ -635,111 +505,130 @@ function ExerciseCard({
             <span className="text-xs text-gray-300">·</span>
             <span className="text-xs text-gray-400">{exercise.sets.length} séries</span>
           </div>
-        </div>
-      </div>
 
-      {/* Sets Table */}
-      <div className="px-4 pt-3 pb-4">
-        <div
-          className="grid gap-2 mb-1.5 px-2"
-          style={{
-            gridTemplateColumns:
-              config.columns.length === 1 ? '36px 1fr 60px' : '36px 1fr 1fr 60px',
-          }}
-        >
-          <div className="text-[10px] font-bold text-gray-400 uppercase text-center self-center">
-            Série
-          </div>
-          {config.columns.map((col) => (
-            <div key={col.key} className="text-[10px] font-bold text-gray-400 uppercase text-center self-center">
-              {col.label}
-            </div>
-          ))}
-          <div />
-        </div>
-
-        <div className="space-y-1">
-          <AnimatePresence mode="popLayout">
-            {exercise.sets.map((set, setIndex) => (
-              <motion.div
-                key={set.id}
-                layout
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10, height: 0 }}
-                className="grid gap-2 items-center bg-gray-50 p-2 rounded-lg group hover:bg-gray-100 transition-colors"
-                style={{
-                  gridTemplateColumns:
-                    config.columns.length === 1 ? '36px 1fr 60px' : '36px 1fr 1fr 60px',
-                }}
-              >
-                <div className="text-sm font-bold text-gray-400 text-center">{setIndex + 1}</div>
-
-                {config.columns.map((col) => (
-                  <div key={col.key} className="relative">
-                    <input
-                      type={col.type}
-                      value={(set[col.key] as string | number) || ''}
-                      onChange={(e) => updateSet(set.id, col.key, e.target.value)}
-                      placeholder={col.placeholder}
-                      className="w-full text-center bg-white border border-gray-200 rounded-md py-1.5 text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
-                    />
-                    {col.suffix && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-                        {col.suffix}
-                      </span>
-                    )}
-                  </div>
-                ))}
-
-                <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => duplicateSet(set.id)}
-                    className="p-1 text-gray-300 hover:text-blue-500 transition-colors"
-                    title="Duplicar série"
-                  >
-                    <Copy size={13} />
-                  </button>
-                  <button
-                    onClick={() => removeSet(set.id)}
-                    className="p-1 text-gray-300 hover:text-red-500 transition-colors"
-                    title="Remover série"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+          {/* Sets Table */}
+          <div>
+            <div
+              className="grid gap-2 mb-1.5 px-2"
+              style={{
+                gridTemplateColumns:
+                  config.columns.length === 1 ? '36px 1fr 60px' : '36px 1fr 1fr 60px',
+              }}
+            >
+              <div className="text-[10px] font-bold text-gray-400 uppercase text-center self-center">
+                Série
+              </div>
+              {config.columns.map((col) => (
+                <div key={col.key} className="text-[10px] font-bold text-gray-400 uppercase text-center self-center">
+                  {col.label}
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+              ))}
+              <div />
+            </div>
 
-        <button
-          onClick={addSet}
-          className="mt-2.5 w-full py-1.5 flex items-center justify-center gap-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200 border-dashed"
-        >
-          <Plus size={16} />
-          Adicionar série
-        </button>
+            <div className="space-y-1">
+              <AnimatePresence mode="popLayout">
+                {exercise.sets.map((set, setIndex) => (
+                  <motion.div
+                    key={set.id}
+                    layout
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10, height: 0 }}
+                    className="grid gap-2 items-center bg-gray-50 p-2 rounded-lg group hover:bg-gray-100 transition-colors"
+                    style={{
+                      gridTemplateColumns:
+                        config.columns.length === 1 ? '36px 1fr 60px' : '36px 1fr 1fr 60px',
+                    }}
+                  >
+                    <div className="text-sm font-bold text-gray-400 text-center">{setIndex + 1}</div>
 
-        {/* Rest Selector */}
-        <div className="mt-4 border-t border-gray-100 pt-3">
+                    {config.columns.map((col) => (
+                      <div key={col.key} className="relative">
+                        <input
+                          type={col.type}
+                          value={(set[col.key] as string | number) || ''}
+                          onChange={(e) => updateSet(set.id, col.key, e.target.value)}
+                          placeholder={col.placeholder}
+                          className="w-full text-center bg-white border border-gray-200 rounded-md py-1.5 text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
+                        />
+                        {col.suffix && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                            {col.suffix}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+
+                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => duplicateSet(set.id)}
+                        className="p-1 text-gray-300 hover:text-blue-500 transition-colors"
+                        title="Duplicar série"
+                      >
+                        <Copy size={13} />
+                      </button>
+                      <button
+                        onClick={() => removeSet(set.id)}
+                        className="p-1 text-gray-300 hover:text-red-500 transition-colors"
+                        title="Remover série"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            <button
+              onClick={addSet}
+              className="mt-2.5 w-full py-1.5 flex items-center justify-center gap-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200 border-dashed"
+            >
+              <Plus size={16} />
+              Adicionar série
+            </button>
+          </div>
+
+          {/* Rest Selector */}
           <RestSelector
             value={exercise.restTime}
             onChange={(val) => onUpdate({ restTime: val })}
           />
+
+          {/* Notes */}
+          <div>
+            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">
+              Observações
+            </label>
+            <textarea
+              value={exercise.notes}
+              onChange={(e) => onUpdate({ notes: e.target.value })}
+              placeholder="Adicionar notas sobre este exercício..."
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all resize-none h-16"
+            />
+          </div>
         </div>
 
-        {/* Notes */}
-        <div className="mt-3">
-          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">
-            Observações
-          </label>
-          <textarea
-            value={exercise.notes}
-            onChange={(e) => onUpdate({ notes: e.target.value })}
-            placeholder="Adicionar notas sobre este exercício..."
-            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all resize-none h-16"
-          />
+        {/* Action buttons column */}
+        <div className="grid grid-rows-3 items-center justify-center flex-shrink-0">
+          <button
+            className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors"
+          >
+            <GripVertical size={18} />
+          </button>
+          <button
+            onClick={onRemove}
+            className="flex items-center justify-center p-2 text-gray-300 hover:text-red-500 transition-colors"
+          >
+            <Trash2 size={18} />
+          </button>
+          <button
+            onClick={onDuplicate}
+            className="flex items-center justify-center p-2 text-gray-300 hover:text-blue-500 transition-colors"
+          >
+            <Copy size={18} />
+          </button>
         </div>
       </div>
     </div>

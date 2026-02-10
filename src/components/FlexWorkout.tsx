@@ -1,4 +1,3 @@
-import React from 'react';
 import { GripVertical, Trash2, Copy, Edit2, Dumbbell } from 'lucide-react';
 import { FlexExercise } from '../types/workout';
 import { motion } from 'framer-motion';
@@ -56,97 +55,88 @@ export function FlexWorkout() {
             opacity: 1,
             y: 0
           }}
-          className="group relative">
+          className="flex flex-col gap-4 py-4 rounded-lg bg-white">
 
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-1 h-8 bg-blue-500 rounded-full"></div>
-              <h3 className="text-lg font-bold text-gray-900">
-                {exercise.name}
-              </h3>
-            </div>
+            {/* Title row */}
+            <h3 className="text-sm font-bold text-gray-900 truncate">
+              {exercise.name}
+            </h3>
 
-            <div className="flex gap-6">
+            {/* Content row: Thumbnail | Form | Actions */}
+            <div className="flex gap-x-4">
               {/* Thumbnail */}
-              <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+              <div className="w-36 h-36 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                 <img
                 src={exercise.thumbnail}
                 alt={exercise.name}
                 className="w-full h-full object-cover" />
-
               </div>
 
-              {/* Fields */}
-              <div className="flex-1 space-y-4">
+              {/* Form fields */}
+              <div className="flex-1 flex flex-col gap-y-3 min-w-0">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <div className="flex flex-col gap-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase">
                       Metodologia
                     </label>
                     <input
                     type="text"
                     defaultValue={exercise.methodology}
-                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
-
+                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <div className="flex flex-col gap-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase">
                       Repetições
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                      type="text"
-                      defaultValue={exercise.reps}
-                      className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
-
-                      <button className="p-2 text-gray-400 hover:text-gray-600">
-                        <GripVertical size={20} />
-                      </button>
-                    </div>
+                    <input
+                    type="text"
+                    defaultValue={exercise.reps}
+                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <div className="flex flex-col gap-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase">
                       Carga
                     </label>
                     <input
                     type="text"
                     defaultValue={exercise.load}
-                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
-
+                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <div className="flex flex-col gap-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase">
                       Intervalo
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                      type="text"
-                      defaultValue={exercise.interval}
-                      className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
-
-                      <button className="p-2 text-gray-400 hover:text-red-500">
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
+                    <input
+                    type="text"
+                    defaultValue={exercise.interval}
+                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all" />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-900 mb-1">
+                <div className="flex flex-col gap-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
                     Observações
                   </label>
-                  <div className="flex gap-2">
-                    <textarea
-                    defaultValue={exercise.notes}
-                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all resize-none h-20" />
-
-                    <button className="p-2 text-gray-400 hover:text-blue-500 self-start">
-                      <Copy size={20} />
-                    </button>
-                  </div>
+                  <textarea
+                  defaultValue={exercise.notes}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all resize-none h-16" />
                 </div>
+              </div>
+
+              {/* Action buttons column */}
+              <div className="grid grid-rows-3 items-center justify-center flex-shrink-0">
+                <button className="flex items-center justify-center p-2 text-gray-300 cursor-grab hover:text-gray-500 transition-colors">
+                  <GripVertical size={18} />
+                </button>
+                <button className="flex items-center justify-center p-2 text-gray-300 hover:text-red-500 transition-colors">
+                  <Trash2 size={18} />
+                </button>
+                <button className="flex items-center justify-center p-2 text-gray-300 hover:text-blue-500 transition-colors">
+                  <Copy size={18} />
+                </button>
               </div>
             </div>
           </motion.div>
